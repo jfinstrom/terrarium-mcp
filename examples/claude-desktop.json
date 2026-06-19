@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "terrarium-mcp": {
+      "command": "node",
+      "args": ["ABSOLUTE_PATH_TO_REPO/dist/index.js"]
+    }
+  }
+}

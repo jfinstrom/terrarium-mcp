@@ -1,0 +1,95 @@
+{
+  "version": "1.0.0",
+  "name": "terrarium-mcp",
+  "description": "Source-grounded FreePBX module development knowledge base",
+  "tiers": [
+    {
+      "id": 1,
+      "name": "Framework Foundation",
+      "description": "Bootstrap, BMO architecture, module lifecycle — load first"
+    },
+    {
+      "id": 2,
+      "name": "Core Module Development",
+      "description": "module.xml, BMO class, GUI, database patterns"
+    },
+    {
+      "id": 3,
+      "name": "Framework Integration",
+      "description": "AJAX, hooks, dialplan, assets, feature codes"
+    },
+    {
+      "id": 4,
+      "name": "CLI, Jobs, and Operations",
+      "description": "fwconsole, reload, backup, signing, permissions"
+    },
+    {
+      "id": 5,
+      "name": "Advanced Ecosystem",
+      "description": "UCP, GraphQL, REST, FastAGI, testing, jobs"
+    },
+    {
+      "id": 6,
+      "name": "Ecosystem Patterns",
+      "description": "Naming, style, packaging, contribution workflow"
+    }
+  ],
+  "topics": [
+    {"id": "01", "tier": 1, "slug": "bootstrap-and-global-state", "title": "Bootstrap chain and global state", "file": "context/01-bootstrap-and-global-state.md", "complexity": "medium", "dependencies": []},
+    {"id": "02", "tier": 1, "slug": "bmo-architecture", "title": "BMO architecture", "file": "context/02-bmo-architecture.md", "complexity": "high", "dependencies": ["01"]},
+    {"id": "03", "tier": 1, "slug": "module-lifecycle", "title": "Module lifecycle (install/uninstall/fwconsole ma)", "file": "context/03-module-lifecycle.md", "complexity": "medium", "dependencies": ["02"]},
+    {"id": "04", "tier": 1, "slug": "functions-inc-legacy", "title": "Legacy functions.inc.php coexistence", "file": "context/04-functions-inc-legacy.md", "complexity": "medium", "dependencies": ["02"]},
+    {"id": "05", "tier": 1, "slug": "external-bootstrap", "title": "External bootstrap", "file": "context/05-external-bootstrap.md", "complexity": "medium", "dependencies": ["01"]},
+    {"id": "06", "tier": 2, "slug": "module-xml-manifest", "title": "module.xml manifest structure", "file": "context/06-module-xml-manifest.md", "complexity": "medium", "dependencies": ["03"]},
+    {"id": "07", "tier": 2, "slug": "module-xml-database", "title": "module.xml database section", "file": "context/07-module-xml-database.md", "complexity": "medium", "dependencies": ["06"]},
+    {"id": "08", "tier": 2, "slug": "bmo-class-interface", "title": "BMO class contract", "file": "context/08-bmo-class-interface.md", "complexity": "high", "dependencies": ["02"]},
+    {"id": "09", "tier": 2, "slug": "database-pdo-patterns", "title": "PDO database patterns", "file": "context/09-database-pdo-patterns.md", "complexity": "medium", "dependencies": ["08"]},
+    {"id": "10", "tier": 2, "slug": "kvstore-config", "title": "KVStore / getConfig / setConfig", "file": "context/10-kvstore-config.md", "complexity": "medium", "dependencies": ["08"]},
+    {"id": "11", "tier": 2, "slug": "request-helper", "title": "Request_Helper patterns", "file": "context/11-request-helper.md", "complexity": "low", "dependencies": ["08"]},
+    {"id": "12", "tier": 2, "slug": "gui-pages-views", "title": "GUI page routing and views", "file": "context/12-gui-pages-views.md", "complexity": "medium", "dependencies": ["08"]},
+    {"id": "13", "tier": 2, "slug": "gui-action-bar", "title": "Action bar and right nav", "file": "context/13-gui-action-bar.md", "complexity": "low", "dependencies": ["12"]},
+    {"id": "14", "tier": 2, "slug": "bootstrap-table-grids", "title": "Bootstrap Table grids", "file": "context/14-bootstrap-table-grids.md", "complexity": "medium", "dependencies": ["12", "15"]},
+    {"id": "15", "tier": 3, "slug": "ajax-routing", "title": "AJAX routing", "file": "context/15-ajax-routing.md", "complexity": "high", "dependencies": ["08"]},
+    {"id": "16", "tier": 3, "slug": "hooks-system", "title": "Hooks system", "file": "context/16-hooks-system.md", "complexity": "high", "dependencies": ["02"]},
+    {"id": "17", "tier": 3, "slug": "hook-response-patterns", "title": "Hook response patterns", "file": "context/17-hook-response-patterns.md", "complexity": "medium", "dependencies": ["16"]},
+    {"id": "18", "tier": 3, "slug": "dialplan-injection", "title": "Dialplan injection", "file": "context/18-dialplan-injection.md", "complexity": "high", "dependencies": ["16"]},
+    {"id": "19", "tier": 3, "slug": "asterisk-config-generation", "title": "Asterisk config generation", "file": "context/19-asterisk-config-generation.md", "complexity": "high", "dependencies": ["16"]},
+    {"id": "20", "tier": 3, "slug": "asset-pipeline", "title": "Asset pipeline", "file": "context/20-asset-pipeline.md", "complexity": "low", "dependencies": ["12"]},
+    {"id": "21", "tier": 3, "slug": "feature-codes", "title": "Feature codes", "file": "context/21-feature-codes.md", "complexity": "medium", "dependencies": ["18"]},
+    {"id": "22", "tier": 3, "slug": "destinations-framework", "title": "Destinations framework", "file": "context/22-destinations-framework.md", "complexity": "medium", "dependencies": ["18"]},
+    {"id": "23", "tier": 4, "slug": "fwconsole-cli", "title": "fwconsole CLI", "file": "context/23-fwconsole-cli.md", "complexity": "medium", "dependencies": ["03"]},
+    {"id": "24", "tier": 4, "slug": "reload-apply-config", "title": "Reload and apply config", "file": "context/24-reload-apply-config.md", "complexity": "high", "dependencies": ["18"]},
+    {"id": "25", "tier": 4, "slug": "cron-jobs", "title": "Cron job registration", "file": "context/25-cron-jobs.md", "complexity": "medium", "dependencies": ["02"]},
+    {"id": "26", "tier": 4, "slug": "backup-restore", "title": "Backup and restore", "file": "context/26-backup-restore.md", "complexity": "high", "dependencies": ["03"]},
+    {"id": "27", "tier": 4, "slug": "doctrine-migrations", "title": "Doctrine migrations", "file": "context/27-doctrine-migrations.md", "complexity": "high", "dependencies": ["09"]},
+    {"id": "28", "tier": 4, "slug": "module-signing", "title": "Module signing", "file": "context/28-module-signing.md", "complexity": "medium", "dependencies": ["03"]},
+    {"id": "29", "tier": 4, "slug": "chown-permissions", "title": "chown and permissions", "file": "context/29-chown-permissions.md", "complexity": "low", "dependencies": ["24"]},
+    {"id": "30", "tier": 5, "slug": "ucp-integration", "title": "UCP integration", "file": "context/30-ucp-integration.md", "complexity": "high", "dependencies": ["08"]},
+    {"id": "31", "tier": 5, "slug": "graphql-api", "title": "GraphQL API", "file": "context/31-graphql-api.md", "complexity": "high", "dependencies": ["02"]},
+    {"id": "32", "tier": 5, "slug": "restapps-api", "title": "REST API", "file": "context/32-restapps-api.md", "complexity": "high", "dependencies": ["02"]},
+    {"id": "33", "tier": 5, "slug": "fastagi", "title": "FastAGI patterns", "file": "context/33-fastagi.md", "complexity": "high", "dependencies": ["18"]},
+    {"id": "34", "tier": 5, "slug": "secure-api-endpoints", "title": "Secure API endpoints", "file": "context/34-secure-api-endpoints.md", "complexity": "high", "dependencies": ["31"]},
+    {"id": "35", "tier": 5, "slug": "commercial-licensing", "title": "Commercial licensing (IONCube)", "file": "context/35-commercial-licensing.md", "complexity": "medium", "dependencies": ["03"]},
+    {"id": "36", "tier": 5, "slug": "i18n-localization", "title": "i18n and localization", "file": "context/36-i18n-localization.md", "complexity": "low", "dependencies": ["12"]},
+    {"id": "37", "tier": 5, "slug": "unit-testing", "title": "Unit testing", "file": "context/37-unit-testing.md", "complexity": "medium", "dependencies": ["02"]},
+    {"id": "38", "tier": 5, "slug": "astman-manager", "title": "Astman / Manager integration", "file": "context/38-astman-manager.md", "complexity": "high", "dependencies": ["01"]},
+    {"id": "39", "tier": 5, "slug": "search-integration", "title": "Search integration", "file": "context/39-search-integration.md", "complexity": "low", "dependencies": ["15"]},
+    {"id": "40", "tier": 5, "slug": "notifications", "title": "Notifications framework", "file": "context/40-notifications.md", "complexity": "medium", "dependencies": ["02"]},
+    {"id": "41", "tier": 5, "slug": "job-queue", "title": "Job queue", "file": "context/41-job-queue.md", "complexity": "medium", "dependencies": ["23"]},
+    {"id": "42", "tier": 6, "slug": "naming-conventions", "title": "Naming conventions", "file": "context/42-naming-conventions.md", "complexity": "low", "dependencies": ["08"]},
+    {"id": "43", "tier": 6, "slug": "code-style-conventions", "title": "Code style conventions", "file": "context/43-code-style-conventions.md", "complexity": "low", "dependencies": []},
+    {"id": "44", "tier": 6, "slug": "error-handling", "title": "Error handling", "file": "context/44-error-handling.md", "complexity": "medium", "dependencies": ["01"]},
+    {"id": "45", "tier": 6, "slug": "framework-libraries", "title": "Framework Composer libraries", "file": "context/45-framework-libraries.md", "complexity": "low", "dependencies": ["02"]},
+    {"id": "46", "tier": 6, "slug": "module-packaging", "title": "Module packaging and repo types", "file": "context/46-module-packaging.md", "complexity": "medium", "dependencies": ["03"]},
+    {"id": "47", "tier": 6, "slug": "contribution-workflow", "title": "Contribution workflow", "file": "context/47-contribution-workflow.md", "complexity": "low", "dependencies": []},
+    {"id": "48", "tier": 6, "slug": "module-generator", "title": "Module generator scaffold", "file": "context/48-module-generator.md", "complexity": "low", "dependencies": ["06"]}
+  ],
+  "sourceRepos": [
+    {"name": "framework", "url": "https://github.com/FreePBX/framework.git", "branch": "release/17.0", "path": "sources/framework"},
+    {"name": "helloworld", "url": "https://github.com/FreePBX/helloworld.git", "branch": "release/15.0", "path": "sources/helloworld"},
+    {"name": "backup", "url": "https://github.com/FreePBX/backup.git", "branch": "release/17.0", "path": "sources/backup"},
+    {"name": "api", "url": "https://github.com/FreePBX/api.git", "branch": "release/17.0", "path": "sources/api"},
+    {"name": "freepbx-dev-docs", "url": "https://github.com/FreePBX/freepbx-dev-docs.git", "branch": "main", "path": "sources/freepbx-dev-docs"},
+    {"name": "freepbx-gists", "url": "https://github.com/FreePBX/FreePBX-gists.git", "branch": "release/15.0", "path": "sources/freepbx-gists"}
+  ]
+}

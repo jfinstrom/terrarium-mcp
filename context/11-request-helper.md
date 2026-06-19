@@ -1,0 +1,210 @@
+# Request_Helper — $_REQUEST Processing
+
+## Scope
+
+Sanitized access to `$_REQUEST` via `getReq()`, bulk import to KVStore via `importRequest()`, and override layer via `setReq()`. Inherited by all BMO modules through `FreePBX_Helpers`.
+
+**Source:** `libraries/BMO/Request_Helper.class.php`
+
+---
+
+## Inheritance Chain
+
+```
+DB_Helper → Self_Helper → Request_Helper → FreePBX_Helpers → Module Class
+```
+
+All BMO module methods have `$this->getReq()` available without explicit import.
+
+---
+
+## `getReq($var, $def = true)`
+
+Sanitized single-variable read from `$_REQUEST`.
+
+```php
+public function doConfigPageInit($page)
+{
+	$action  = $this->getReq('action', '');
+	$id      = $this->getReq('id', '');
+	$subject = $this->getReq('subject', '');
+	$body    = $this->getReq('body');
+}
+```
+
+### Return Semantics
+
+| Condition | `$def` Value | Return |
+|-----------|-------------|--------|
+| Key not set | `false` | `null` |
+| Key not set | `true` (default) | Check `$reqDefaults` static property, else `""` |
+| Key not set | string/int | The provided default |
+| Key set | any | Sanitized value |
+
+### Sanitization
+
+Uses `getSanitizedRequest()` → `filter_input_array()` with `FILTER_SANITIZE_FULL_SPECIAL_CHARS` across GET/POST/COOKIE per `request_order` ini setting.
+
+---
+
+## `getReqUnsafe($var, $def = true)`
+
+Raw `$_REQUEST` access without sanitization filter. Use only when sanitized output would corrupt expected data (base64, structured tokens).
+
+```php
+$raw = $this->getReqUnsafe('encoded_payload', false);
+```
+
+---
+
+## `getSanitizedRequest($definition, $add_empty)`
+
+Returns full sanitized request array:
+
+```php
+$all = $this->getSanitizedRequest();
+// Equivalent to filter_input_array on GET + POST + COOKIE
+```
+
+Custom filter:
+
+```php
+$ints = $this->getSanitizedRequest(FILTER_SANITIZE_NUMBER_INT);
+```
+
+---
+
+## `setReq($var, $val)`
+
+Override layer for backwards compatibility with modules that mutated `$_REQUEST` (read-only in PHP 5.5+).
+
+```php
+$this->setReq('action', 'edit');
+$this->setReq('id', 42);
+
+// Remove override (fall back to $_REQUEST)
+$this->setReq('action', null);
+
+// Simulate deletion
+$this->setReq('action', false);
+```
+
+Overrides checked before `$_REQUEST` in `getSingleRequestVariable()`.
+
+---
+
+## `importRequest($ignoreVars, $ignoreRegexp, $id)`
+
+Bulk-imports `$_REQUEST` into KVStore via `setConfig()`.
+
+```php
+$ignored = $this->importRequest(
+	['display', 'type', 'category', 'Submit'],  // default ignore list
+	null,
+	'form_session_123'
+);
+```
+
+### Processing Rules
+
+| Input Pattern | Stored As |
+|---------------|-----------|
+| Normal key/value | `setConfig($key, $val, $id)` |
+| Radio button `foo=bar` | `setConfig('foo', 'bar', $id)` |
+| Key with `_` | Underscores replaced with `.` before storage |
+
+Returns array of ignored variables not imported.
+
+**Does NOT use** `setReq`/`getReq` override layer.
+
+---
+
+## Class-Level Defaults (`$reqDefaults`)
+
+```php
+class Mymodule extends FreePBX_Helpers implements BMO
+{
+	public static $reqDefaults = [
+		'action' => 'list',
+		'view'   => 'grid',
+	];
+}
+```
+
+When `getReq('action')` called and key absent, returns `'list'` from `$reqDefaults`.
+
+Requires `property_exists($class, "reqDefaults")` on the calling class.
+
+---
+
+## `classOverride`
+
+```php
+$this->classOverride = 'OtherModule';
+$value = $this->getConfig('key');  // reads from OtherModule's kvstore table
+```
+
+Affects `getSingleRequestVariable` default lookup class when resolving `$reqDefaults`.
+
+---
+
+## Common Patterns
+
+### Form Mutation Handler
+
+```php
+public function doConfigPageInit($page)
+{
+	$action = $this->getReq('action', '');
+
+	if ('add' == $action) {
+		return $this->addItem(
+			$this->getReq('subject', ''),
+			$this->getReq('body', '')
+		);
+	}
+	if ('delete' == $action) {
+		return $this->deleteItem($this->getReq('id', ''));
+	}
+}
+```
+
+### Conditional View Switch
+
+```php
+public function showPage()
+{
+	if ('form' == $_REQUEST['view']) {
+		// view param often read directly; getReq() also valid:
+		// if ('form' == $this->getReq('view', ''))
+	}
+}
+```
+
+### Persist Form State Across Redirect
+
+```php
+$this->importRequest(['display', 'action'], null, 'wizard_step_2');
+// Later:
+$step2data = $this->getAll('wizard_step_2');
+```
+
+---
+
+## Security Notes
+
+- `getReq()` encodes HTML-special characters — safe for echo into HTML attributes
+- Not a substitute for prepared statements — use PDO for SQL
+- Not validation — check business rules after retrieval
+- `getReqUnsafe()` bypasses sanitization — validate manually
+- AJAX handlers often read `$_REQUEST` directly; `getReq()` preferred in `doConfigPageInit`
+
+---
+
+## Constraints
+
+- `getReq(null)` / `getSingleRequestVariable(null)` throws Exception
+- `setReq(null)` throws Exception
+- Default return for unset keys is `""` (empty string), not `false` — use `$def = false` to distinguish unset
+- `importRequest` default ignores: `display`, `type`, `category`, `Submit`
+- Radio button detection regex: `/^$key=(.+)$/`

@@ -1,0 +1,159 @@
+# module.xml Database Section
+
+## Scope
+
+Declarative database schema definition within `module.xml`. Framework auto-creates and migrates tables on install/upgrade.
+
+---
+
+## XML Structure
+
+```xml
+<database>
+	<table name="users">
+		<field name="id" type="integer" primarykey="true" autoincrement="true" notnull="true"/>
+		<field name="username" type="string" length="50" notnull="true"/>
+		<field name="balance" type="decimal" precision="10" scale="2" default="0.00"/>
+		<field name="is_active" type="boolean" default="true"/>
+		<field name="created_at" type="datetime"/>
+		<field name="notes" type="text"/>
+		<field name="avatar" type="blob"/>
+		<key name="idx_username" type="unique">
+			<column name="username"/>
+		</key>
+		<key name="idx_active" type="index">
+			<column name="is_active"/>
+		</key>
+	</table>
+</database>
+```
+
+Optional root attribute: `<database name="mydb">` — included when database name is non-empty.
+
+---
+
+## `<field>` Attributes
+
+| Attribute | Values | Notes |
+|-----------|--------|-------|
+| `name` | string | Column name |
+| `type` | see below | Required |
+| `length` | integer | For `string` type |
+| `precision` | integer | For `decimal`/`float` |
+| `scale` | integer | For `decimal`/`float` |
+| `default` | scalar | Default value |
+| `unsigned` | `true`/`false` | Numeric types |
+| `notnull` | `true`/`false` | Nullability |
+| `primarykey` | `true`/`false` | Primary key flag |
+| `autoincrement` | `true`/`false` | Auto-increment |
+
+### Supported Field Types
+
+| Type | Additional Attributes |
+|------|---------------------|
+| `string` | `length` |
+| `integer` | — |
+| `bigint` | — |
+| `smallint` | — |
+| `boolean` | — |
+| `text` | — |
+| `blob` | — |
+| `date` | — |
+| `datetime` | — |
+| `float` | `precision`, `scale` |
+| `decimal` | `precision`, `scale` |
+
+Unsupported types throw `"Unknown type"` exception during schema generation.
+
+---
+
+## `<key>` Elements
+
+```xml
+<key name="idx_username" type="unique">
+	<column name="username"/>
+</key>
+```
+
+| Attribute | Values |
+|-----------|--------|
+| `name` | Index name |
+| `type` | `unique` or `index` |
+
+Primary keys are declared on `<field primarykey="true">`, not as `<key>`.
+
+---
+
+## Multi-Table Declaration
+
+```xml
+<database>
+	<table name="helloworld">
+		<field name="id" type="integer" primarykey="true" autoincrement="true"/>
+		<field name="subject" type="string" length="150" notnull="false"/>
+		<field name="body" type="string" length="255" notnull="false"/>
+	</table>
+	<table name="helloworld_log">
+		<field name="id" type="integer" primarykey="true" autoincrement="true"/>
+		<field name="item_id" type="integer" notnull="true"/>
+		<field name="action" type="string" length="50"/>
+		<field name="timestamp" type="datetime"/>
+	</table>
+</database>
+```
+
+---
+
+## Lifecycle Integration
+
+| Event | Framework Action |
+|-------|-----------------|
+| Install | CREATE TABLE for all declared tables |
+| Upgrade | ALTER TABLE diff based on version bump |
+| Uninstall | DROP TABLE for all declared tables |
+
+No manual SQL required in `install()` when schema is fully declared in XML.
+
+---
+
+## PDO Access After Creation
+
+```php
+public function getOne($id)
+{
+	$sql = "SELECT id, subject, body FROM helloworld WHERE id = :id";
+	$stmt = $this->Database->prepare($sql);
+	$stmt->bindParam(':id', $id, \PDO::PARAM_INT);
+	$stmt->execute();
+	return $stmt->fetch(\PDO::FETCH_ASSOC);
+}
+```
+
+Table names in SQL match `<table name="">` values exactly.
+
+---
+
+## KVStore vs Module Tables
+
+| Storage | Table Pattern | Purpose |
+|---------|--------------|---------|
+| Module data tables | `{tablename}` from XML | Structured relational data |
+| KVStore | `kvstore_{namespace}_{class}` | Key-value config per module class |
+
+KVStore tables are auto-created by `DB_Helper`, not declared in `module.xml`.
+
+---
+
+## Migration Beyond XML
+
+For complex migrations, use Doctrine migrations (see `27-doctrine-migrations.md`). The XML schema engine handles additive changes; destructive migrations may need manual `upgrade()` logic.
+
+---
+
+## Constraints
+
+- Table/column names must be valid MySQL identifiers
+- `notnull="false"` is the explicit nullable declaration
+- Framework strips XML declaration from generated output
+- Schema diff on upgrade is conservative; always test upgrade paths
+- Do not use deprecated `install.sql` / `uninstall.sql`
