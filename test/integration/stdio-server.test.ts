@@ -25,8 +25,12 @@ describe("Integration — stdio server (spawned process)", () => {
 			await runCoreIntegrationScenarios(client);
 
 			const deps = await client.callTool({
-				name: "get_topic",
-				arguments: { query: "08", include_dependencies: true },
+				name: "get_topic_details",
+				arguments: {
+					query: "08",
+					include_dependencies: true,
+					detail_level: "full-doc",
+				},
 			});
 			const text = extractToolText(deps);
 			assert.match(text, /# Topic 01:/);

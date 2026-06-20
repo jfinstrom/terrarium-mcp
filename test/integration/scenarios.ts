@@ -12,34 +12,41 @@ export async function runCoreIntegrationScenarios(
 	const { tools } = await client.listTools();
 	const toolNames = tools.map((t) => t.name).sort();
 	assert.deepEqual(toolNames, [
-		"get_topic",
-		"list_topics",
+		"expand_topic_dependencies",
+		"generate_module_plan",
+		"get_topic_details",
 		"read_source_file",
+		"recommend_context_for_task",
 		"search_context",
 		"search_sources",
-		"suggest_learning_path",
 	]);
 
 	const listResult = await client.callTool({
-		name: "list_topics",
+		name: "get_topic_details",
 		arguments: {},
 	});
 	assert.match(extractToolText(listResult), /Terrarium MCP — 48 topics/);
 
 	const tierResult = await client.callTool({
-		name: "list_topics",
+		name: "get_topic_details",
 		arguments: { tier: 1 },
 	});
 	assert.match(extractToolText(tierResult), /Terrarium MCP — 5 topics/);
 
 	const topicResult = await client.callTool({
-		name: "get_topic",
-		arguments: { query: "08" },
+		name: "get_topic_details",
+		arguments: { query: "08", detail_level: "full-doc" },
 	});
 	assert.match(extractToolText(topicResult), /BMO class/i);
 
+	const summaryResult = await client.callTool({
+		name: "get_topic_details",
+		arguments: { query: "15", detail_level: "summary" },
+	});
+	assert.match(extractToolText(summaryResult), /Likely files:/);
+
 	const badTopic = await client.callTool({
-		name: "get_topic",
+		name: "get_topic_details",
 		arguments: { query: "not-a-real-topic-xyz" },
 	});
 	assert.equal(badTopic.isError, true);
@@ -50,11 +57,45 @@ export async function runCoreIntegrationScenarios(
 	});
 	assert.match(extractToolText(searchResult), /Found \d+ matches/);
 
-	const pathResult = await client.callTool({
-		name: "suggest_learning_path",
-		arguments: { task: "build module with ajax grid" },
+	const contextResult = await client.callTool({
+		name: "recommend_context_for_task",
+		arguments: {
+			task: "Add a database-backed admin page with AJAX grid",
+			task_type: "feature",
+			target_area: "gui",
+		},
 	});
-	assert.match(extractToolText(pathResult), /Suggested learning path/);
+	const contextText = extractToolText(contextResult);
+	assert.match(contextText, /Recommended topics:/);
+	assert.match(contextText, /Likely files:/);
+	assert.match(contextText, /Next step:/);
+
+	const bugfixResult = await client.callTool({
+		name: "recommend_context_for_task",
+		arguments: {
+			task: "Fix why settings save but don't persist",
+			task_type: "bugfix",
+		},
+	});
+	assert.match(extractToolText(bugfixResult), /Diagnostic checklist:/);
+
+	const depsResult = await client.callTool({
+		name: "expand_topic_dependencies",
+		arguments: { query: "15" },
+	});
+	assert.match(extractToolText(depsResult), /Dependency chain/);
+
+	const planResult = await client.callTool({
+		name: "generate_module_plan",
+		arguments: {
+			rawname: "orders",
+			features: ["gui", "database", "ajax", "backup"],
+		},
+	});
+	const planText = extractToolText(planResult);
+	assert.match(planText, /Module plan: orders/);
+	assert.match(planText, /Backup\.php/);
+	assert.match(planText, /Implementation order:/);
 
 	const { resources } = await client.listResources();
 	assert.equal(resources.length, 49);
@@ -83,4 +124,5 @@ export async function runCoreIntegrationScenarios(
 				? msg.content.text
 				: "";
 	assert.match(text, /ajax returns 500/);
+	assert.match(text, /recommend_context_for_task/);
 }
